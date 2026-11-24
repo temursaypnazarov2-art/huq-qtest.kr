@@ -34,7 +34,8 @@
       ratingTitle: "Reyting", ratingHint: "Har bir mavzu bo'yicha eng yaxshi natijangiz.", ratingNone: "natija yo'q",
       profileTitle: "Profil", total: "jami ball", tests: "topshirilgan test",
       language: "Til", languageHint: "Tanlangan til menyu va test savollariga qo'llanadi.",
-      guest: "Foydalanuvchi"
+      guest: "Foydalanuvchi",
+      back: "Orqaga", comingSoon: "Tez orada", sectionHint: "Tayyorgarlik bo'limini tanlang.", mixedSection: "Aralash test"
     },
     kk: {
       appName: "Huqıq Test",
@@ -64,7 +65,8 @@
       ratingTitle: "Reyting", ratingHint: "Hár bir tema boyınsha eń jaqsı nátiyjeńiz.", ratingNone: "nátiyje joq",
       profileTitle: "Profil", total: "jámi bal", tests: "tapsırılǵan test",
       language: "Til", languageHint: "Saylanǵan til menyu hám test sorawlarına qollanıladı.",
-      guest: "Paydalanıwshı"
+      guest: "Paydalanıwshı",
+      back: "Artqa", comingSoon: "Jaqında", sectionHint: "Tayarlıq bólimin saylań.", mixedSection: "Aralas test"
     }
   };
 
@@ -89,6 +91,9 @@
     right: '<path d="M9 5l7 7-7 7"/>',
     gridsq: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
     x: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+    book: '<path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-7"/><path d="M20 5v13h-7"/>',
+    clipcheck: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 14l2 2 4-4"/>',
+    award: '<circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/>',
     target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8"/>',
     flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
     list: '<path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/>'
@@ -111,7 +116,7 @@
   }
   function saveHistory(h) { safeSet(STORE_KEY, JSON.stringify(h.slice(-200))); }
 
-  var state = { lang: detectLang(), tab: "home", view: "tabs", quiz: null, result: null, sheet: false, history: loadHistory(), timer: null };
+  var state = { lang: detectLang(), tab: "home", section: null, view: "tabs", quiz: null, result: null, sheet: false, history: loadHistory(), timer: null };
 
   function t() { return I18N[state.lang]; }
   function L(obj) { return obj[state.lang] || obj.uz; }
@@ -119,7 +124,14 @@
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
   function fmt(sec) { sec = Math.max(0, sec); var m = Math.floor(sec / 60), s = sec % 60; return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s; }
   function topicById(id) { return window.TOPICS.filter(function (x) { return x.id === id; })[0]; }
-  function topicTitle(id) { return id === "mixed" ? t().mixedName : L(topicById(id).title); }
+  function sectionById(id) { return (window.SECTIONS || []).filter(function (x) { return x.id === id; })[0]; }
+  function qCount(id) { return (window.QUESTIONS[id] || []).length; }
+  function hasQ(tp) { return qCount(tp.id) > 0; }
+  function topicTitle(id) {
+    if (id.indexOf("mixed") === 0) { return t().mixedName; }
+    var tp = topicById(id);
+    return tp ? L(tp.title) : id;
+  }
   function pctOf(r) { return Math.round((r.correct / r.total) * 100); }
   function haptic(kind) { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(kind || "light"); } catch (e) {} }
   function answeredCount(qz) { return qz.items.filter(function (i) { return i.picked !== null; }).length; }
@@ -131,8 +143,10 @@
   // ---------- Test ----------
   function buildQuiz(topicId) {
     var pool = [];
-    if (topicId === "mixed") {
-      Object.keys(window.QUESTIONS).forEach(function (id) { window.QUESTIONS[id].forEach(function (q) { pool.push(q); }); });
+    if (topicId.indexOf("mixed") === 0) {
+      var sec = sectionById(topicId.split(":")[1]);
+      var ids = sec ? sec.topics : Object.keys(window.QUESTIONS);
+      ids.forEach(function (id) { (window.QUESTIONS[id] || []).forEach(function (q) { pool.push(q); }); });
       pool = shuffle(pool).slice(0, 10);
     } else {
       pool = shuffle(window.QUESTIONS[topicId] || []);
@@ -225,14 +239,29 @@
   }
 
   function viewTopics() {
-    var cards = window.TOPICS.map(function (tp) {
-      var n = (window.QUESTIONS[tp.id] || []).length;
-      return '<button class="card" data-act="start" data-id="' + tp.id + '"><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") +
-        '</div><div class="grow"><div class="name">' + esc(L(tp.title)) + '</div><div class="meta">' + t().questionsN(n) + "</div></div></button>";
+    var sec = state.section ? sectionById(state.section) : null;
+    if (!sec) {
+      var cards = (window.SECTIONS || []).map(function (s, idx) {
+        var first = idx === 0;
+        return '<button class="sec' + (first ? " first" : "") + '" data-act="section" data-id="' + s.id + '"><div class="row" style="justify-content:space-between;width:100%">' +
+          '<div class="sico' + (first ? " gold" : "") + '" style="width:52px;height:52px">' + svg(ICON[s.icon] || ICON.doc, 26, first ? "#0F1E3D" : "#C9A24B") + "</div>" + svg(ICON.right, 22, "#C9A24B") + "</div>" +
+          '<div class="sec-t">' + esc(L(s.title)) + '</div><div class="meta" style="font-size:14px">' + esc(L(s.desc)) + "</div></button>";
+      }).join("");
+      return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().tabs.topics + '</h1><p class="sub">' + t().sectionHint + "</p></div>" +
+        '<div class="list" style="gap:14px">' + cards + "</div></div>";
+    }
+    var tps = sec.topics.map(topicById).filter(Boolean);
+    var total = tps.reduce(function (s, tp) { return s + qCount(tp.id); }, 0);
+    var rows = tps.map(function (tp) {
+      var n = qCount(tp.id);
+      return '<button class="card" data-act="start" data-id="' + tp.id + '"' + (n ? "" : " disabled") + '><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") +
+        '</div><div class="grow"><div class="name">' + esc(L(tp.title)) + '</div><div class="meta">' + (n ? t().questionsN(n) : t().comingSoon) + "</div></div>" +
+        (n ? svg(ICON.right, 20, "#AAB3CC") : "") + "</button>";
     }).join("");
-    return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().pickTopic + '</h1><p class="sub">' + t().topicHint + "</p></div>" +
-      '<div class="list">' + cards + "</div>" +
-      '<button class="btn gold spacer" data-act="start" data-id="mixed">' + t().mixed + "</button></div>";
+    return '<div class="screen"><div class="row" style="gap:8px"><button class="xbtn" data-act="sectionBack" aria-label="' + t().back + '">' + svg(ICON.left, 20) + '</button><div class="meta" style="font-size:14px;font-weight:600;color:var(--ink-2)">' + t().tabs.topics + "</div></div>" +
+      '<div class="list" style="gap:8px"><h1 style="font-size:28px">' + esc(L(sec.title)) + '</h1><p class="sub">' + t().pickTopic + "</p></div>" +
+      '<div class="list">' + rows + "</div>" +
+      (total ? '<button class="btn gold spacer" data-act="start" data-id="mixed:' + sec.id + '">' + t().mixedSection + "</button>" : "") + "</div>";
   }
 
   function viewQuiz() {
@@ -290,7 +319,7 @@
   }
 
   function viewRating() {
-    var rows = window.TOPICS.map(function (tp) {
+    var rows = window.TOPICS.filter(hasQ).map(function (tp) {
       var best = null;
       state.history.forEach(function (r) { if (r.topicId === tp.id) { var p = pctOf(r); if (best === null || p > best) best = p; } });
       return '<div class="card"><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") + '</div><div class="grow"><div class="name">' + esc(L(tp.title)) +
@@ -345,7 +374,9 @@
     var act = el.getAttribute("data-act");
     // Oyna fonini bosganda yopiladi, lekin ichidagi tugmalar yopmasin
     if (act === "closeSheet" && el.classList.contains("sheet-back") && e.target !== el) return;
-    if (act === "tab") { state.tab = el.getAttribute("data-tab"); state.view = "tabs"; render(); window.scrollTo(0, 0); }
+    if (act === "tab") { state.tab = el.getAttribute("data-tab"); state.view = "tabs"; state.section = null; render(); window.scrollTo(0, 0); }
+    else if (act === "section") { state.section = el.getAttribute("data-id"); render(); window.scrollTo(0, 0); }
+    else if (act === "sectionBack") { state.section = null; render(); window.scrollTo(0, 0); }
     else if (act === "start" || act === "retry") { startQuiz(el.getAttribute("data-id")); window.scrollTo(0, 0); }
     else if (act === "goTopics") { state.view = "tabs"; state.tab = "topics"; render(); window.scrollTo(0, 0); }
     else if (act === "pick") { state.quiz.items[state.quiz.i].picked = +el.getAttribute("data-pos"); haptic("light"); renderKeepScroll(); }

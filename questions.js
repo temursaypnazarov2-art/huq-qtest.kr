@@ -8,7 +8,29 @@
 //
 // Qaraqalpaqcha matnlarni qaraqalpoq tilini biladigan mutaxassis tekshirib chiqishi tavsiya etiladi.
 
+// Bo'limlar: "topics" ichida mavzu id'lari turadi (ular quyidagi TOPICS ro'yxatida).
+window.SECTIONS = [
+  {
+    id: "attestatsiya", icon: "clipcheck",
+    title: { uz: "Atestatsiyaga tayyorlanish", kk: "Attestatsiyaǵa tayarlanıw" },
+    desc: { uz: "Darslik mavzulari bo'yicha savollar", kk: "Dárislik temaları boyınsha sorawlar" },
+    topics: ["sinf8", "sinf9", "sinf10", "sinf11"]
+  },
+  {
+    id: "sertifikat", icon: "award",
+    title: { uz: "Milliy sertifikat imtihoniga tayyorgarlik", kk: "Milliy sertifikat imtixanına tayarlıq" },
+    desc: { uz: "Mavzular bo'yicha savollar", kk: "Temalar boyınsha sorawlar" },
+    topics: ["nazariya", "konst", "fuqaro", "jinoyat", "mehnat"]
+  }
+];
+
 window.TOPICS = [
+  // Darsliklar (savollar hali qo'shilmagan: QUESTIONS ichiga shu id bilan massiv qo'shing)
+  { id: "sinf8", title: { uz: "8-sinf huquq darsligi", kk: "8-klass huqıq dárisligi" }, icon: "book" },
+  { id: "sinf9", title: { uz: "9-sinf huquq darsligi", kk: "9-klass huqıq dárisligi" }, icon: "book" },
+  { id: "sinf10", title: { uz: "10-sinf huquq darsligi", kk: "10-klass huqıq dárisligi" }, icon: "book" },
+  { id: "sinf11", title: { uz: "11-sinf huquq darsligi", kk: "11-klass huqıq dárisligi" }, icon: "book" },
+  // Umumiy mavzular
   { id: "nazariya", title: { uz: "Davlat va huquq nazariyasi", kk: "Mámleket hám huqıq teoriyası" }, icon: "scales" },
   { id: "konst", title: { uz: "Konstitutsiyaviy huquq", kk: "Konstitutsiyalıq huqıq" }, icon: "doc" },
   { id: "fuqaro", title: { uz: "Fuqarolik huquqi", kk: "Puqaralıq huqıq" }, icon: "handshake" },
