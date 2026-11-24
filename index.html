@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Huquq Test</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1E3D; --bg-deep:#0A1630; --card:#16295A; --line:#2A3D6E; --line-2:#5A6C99;
+  --ink:#F6F1E4; --ink-2:#D8DCE8; --ink-3:#C9CFDD; --muted:#AAB3CC;
+  --gold:#C9A24B; --gold-ink:#0F1E3D; --ok:#5FD39A; --bad:#FF8A8A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+.screen{flex:1;display:flex;flex-direction:column;gap:20px;padding:24px 20px 20px}
+h1{margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:30px;line-height:1.2}
+.q-title{font-size:24px;line-height:1.3}
+.sub{margin:0;font-size:15px;line-height:1.45;color:var(--ink-3)}
+.row{display:flex;align-items:center}
+.topbar{justify-content:space-between;gap:12px}
+.brand{gap:10px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.logo{width:36px;height:36px;border-radius:18px;background:var(--gold);display:flex;align-items:center;justify-content:center}
+.chip{font-size:13px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:999px;padding:6px 12px}
+.chip.gold{color:var(--gold);border-color:var(--gold);font-weight:600;display:flex;gap:6px;align-items:center}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:44px;width:100%;text-align:left}
+button.card:active{background:#1b3270}
+.ico{width:44px;height:44px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.grow{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.name{font-size:16px;font-weight:600}
+.meta{font-size:13px;color:var(--ink-3)}
+.btn{border:0;border-radius:14px;min-height:54px;padding:0 20px;font-weight:600;font-size:16px;display:flex;align-items:center;justify-content:center;width:100%}
+.btn.gold{background:var(--gold);color:var(--gold-ink)}
+.btn.gold:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:none;border:1px solid var(--line-2);color:var(--ink-2);font-size:15px}
+.spacer{margin-top:auto}
+.footer{display:flex;gap:10px}
+.footer .ghost{width:auto;flex:0 0 auto}
+.progress{display:flex;flex-direction:column;gap:8px}
+.progress .labels{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-3)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar > i{display:block;height:6px;background:var(--gold);border-radius:3px}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-height:44px;display:flex;align-items:center;gap:14px;width:100%;text-align:left;font-size:15px;line-height:1.35}
+.opt .key{width:30px;height:30px;border-radius:15px;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.opt.sel{border:2px solid var(--gold);padding:13px 15px}
+.opt.sel .key{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.opt.ok{border:2px solid var(--ok);padding:13px 15px}
+.opt.ok .key{background:var(--ok);color:#06281A;border-color:var(--ok)}
+.opt.bad{border:2px solid var(--bad);padding:13px 15px}
+.opt.bad .key{background:var(--bad);color:#3A0B0B;border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.note{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45;color:#E4E7F0}
+.note b{font-size:13px;color:var(--gold)}
+.note.ok b{color:var(--ok)} .note.bad b{color:var(--bad)}
+.score{align-self:center;width:150px;height:150px;border-radius:75px;border:6px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.score strong{font-family:'Playfair Display',Georgia,serif;font-size:46px;line-height:1}
+.score span{font-size:13px;color:var(--ink-3)}
+.center{text-align:center;align-items:center}
+.stats{display:flex;gap:10px}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.stat b{font-size:19px;font-weight:600}
+.stat span{font-size:12px;color:var(--ink-3)}
+.seg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;display:flex;gap:4px}
+.seg button{flex:1;min-height:48px;border:0;border-radius:11px;background:none;color:var(--ink-2);font-size:15px;font-weight:500}
+.seg button.on{background:var(--gold);color:var(--gold-ink);font-weight:600}
+.label{font-size:14px;font-weight:600;color:var(--gold)}
+.avatar{width:64px;height:64px;border-radius:32px;background:var(--gold);color:var(--gold-ink);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;flex-shrink:0}
+.pct{font-weight:600;font-size:15px;color:var(--gold);flex-shrink:0}
+.empty{color:var(--ink-3);font-size:15px;text-align:center;padding:32px 0}
+nav{position:sticky;bottom:0;background:var(--bg-deep);border-top:1px solid var(--line);padding:8px 8px calc(10px + env(safe-area-inset-bottom));display:flex}
+nav button{flex:1;min-height:48px;background:none;border:0;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:500;color:var(--muted)}
+nav button.on{color:var(--gold);font-weight:600}
+svg{display:block}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
