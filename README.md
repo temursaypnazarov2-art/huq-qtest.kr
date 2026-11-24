@@ -4,20 +4,20 @@ Telegram **Mini App** asosidagi test boti. `/start` bosilgach til tanlanadi, so'
 
 ## Fayllar
 
-| Fayl | Vazifasi |
-|---|---|
-| `index.html` | Mini App sahifasi va dizayni |
-| `app.js` | Test mantiqi, menyu (Mavzular / Natijalar / Reyting / Profil), til almashtirish |
-| `questions.js` | Savollar bazasi (ikki tilda) |
-| `bot.py` | Telegram bot (til tanlash va "Ochish" menyu tugmasi) |
-| `requirements.txt` | Python kutubxonalari |
+|Fayl|Vazifasi|
+|-|-|
+|`index.html`|Mini App sahifasi va dizayni|
+|`app.js`|Test mantiqi, menyu (Mavzular / Natijalar / Reyting / Profil), til almashtirish|
+|`questions.js`|Savollar bazasi (ikki tilda)|
+|`bot.py`|Telegram bot (til tanlash va "Ochish" menyu tugmasi)|
+|`requirements.txt`|Python kutubxonalari|
 
-## 1. Botni yaratish
+## 1\. Botni yaratish
 
 1. Telegramda **@BotFather** ga `/newbot` yozing, nom va username bering.
 2. Olingan **tokenni** saqlab qo'ying.
 
-## 2. Mini Appni joylashtirish (HTTPS shart)
+## 2\. Mini Appni joylashtirish (HTTPS shart)
 
 `index.html`, `app.js`, `questions.js` fayllarini bepul hostingga yuklang, masalan **GitHub Pages**:
 
@@ -28,18 +28,18 @@ Telegram **Mini App** asosidagi test boti. `/start` bosilgach til tanlanadi, so'
 
 (Vercel yoki Netlify ham ishlaydi.)
 
-## 3. Botni ishga tushirish
+## 3\. Botni ishga tushirish
 
 ```bash
 pip install -r requirements.txt
 
-export BOT_TOKEN="BotFather bergan token"
-export WEBAPP_URL="https://SIZNING-NOM.github.io/huquq-test"
+export BOT\_TOKEN="9069231713:AAE36d7CW82SD6HOS4PA8Ctbce0-1JFJpPU"
+export WEBAPP\_URL="https://github.com/temursaypnazarov2-art/huq-qtest.kr.git"
 
 python bot.py
 ```
 
-Windows'da `export` o'rniga: `set BOT_TOKEN=...` va `set WEBAPP_URL=...`
+Windows'da `export` o'rniga: `set BOT\_TOKEN=...` va `set WEBAPP\_URL=...`
 
 Botga kirib `/start` bosing: til tanlanadi, keyin pastda **Ochish** tugmasi chiqadi.
 
@@ -52,7 +52,7 @@ Bot doimiy ishlashi uchun uni serverda (VPS, Railway, Render va hokazo) ishga tu
 ```js
 {
   q: { uz: "Savol matni", kk: "Soraw teksti" },
-  o: [
+  o: \[
     { uz: "To'g'ri javob", kk: "Durıs juwap" },
     { uz: "Variant 2",     kk: "Variant 2" },
     { uz: "Variant 3",     kk: "Variant 3" },
@@ -67,6 +67,7 @@ Yangi mavzu uchun `window.TOPICS` ga qator va `window.QUESTIONS` ga shu `id` bil
 
 ## Muhim eslatmalar
 
-- **Qoraqalpoqcha tarjima**: savollar va izohlar tarjimasini qoraqalpoq tilini biladigan mutaxassis (yoki huquqshunos) tekshirib chiqishi shart, ayniqsa huquqiy atamalarni.
-- **Natijalar** foydalanuvchi qurilmasida (brauzer xotirasida) saqlanadi. **Reyting** bo'limi hozircha har bir mavzu bo'yicha foydalanuvchining o'z eng yaxshi natijasini ko'rsatadi. Foydalanuvchilar o'rtasidagi umumiy reyting uchun server va ma'lumotlar bazasi kerak bo'ladi.
-- Savollar sahifa ichida turgani uchun texnik jihatdan ochiq. Rasmiy imtihon uchun savollarni serverga ko'chirish kerak.
+* **Qoraqalpoqcha tarjima**: savollar va izohlar tarjimasini qoraqalpoq tilini biladigan mutaxassis (yoki huquqshunos) tekshirib chiqishi shart, ayniqsa huquqiy atamalarni.
+* **Natijalar** foydalanuvchi qurilmasida (brauzer xotirasida) saqlanadi. **Reyting** bo'limi hozircha har bir mavzu bo'yicha foydalanuvchining o'z eng yaxshi natijasini ko'rsatadi. Foydalanuvchilar o'rtasidagi umumiy reyting uchun server va ma'lumotlar bazasi kerak bo'ladi.
+* Savollar sahifa ichida turgani uchun texnik jihatdan ochiq. Rasmiy imtihon uchun savollarni serverga ko'chirish kerak.
+
