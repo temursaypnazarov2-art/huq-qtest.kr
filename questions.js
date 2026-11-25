@@ -25,11 +25,12 @@ window.SECTIONS = [
 ];
 
 window.TOPICS = [
-  // Darsliklar (savollar hali qo'shilmagan: QUESTIONS ichiga shu id bilan massiv qo'shing)
-  { id: "sinf8", title: { uz: "8-sinf huquq darsligi", kk: "8-klass huqıq dárisligi" }, icon: "book" },
-  { id: "sinf9", title: { uz: "9-sinf huquq darsligi", kk: "9-klass huqıq dárisligi" }, icon: "book" },
-  { id: "sinf10", title: { uz: "10-sinf huquq darsligi", kk: "10-klass huqıq dárisligi" }, icon: "book" },
-  { id: "sinf11", title: { uz: "11-sinf huquq darsligi", kk: "11-klass huqıq dárisligi" }, icon: "book" },
+  // PULLIK darsliklar (paid: true). Ularning savollari bu faylda EMAS, botdagi paid_questions.json
+  // faylida turadi va to'lov tasdiqlangach Firebase orqali foydalanuvchiga beriladi.
+  { id: "sinf8", title: { uz: "8-sinf huquq darsligi", kk: "8-klass huqıq dárisligi" }, icon: "book", paid: true },
+  { id: "sinf9", title: { uz: "9-sinf huquq darsligi", kk: "9-klass huqıq dárisligi" }, icon: "book", paid: true },
+  { id: "sinf10", title: { uz: "10-sinf huquq darsligi", kk: "10-klass huqıq dárisligi" }, icon: "book", paid: true },
+  { id: "sinf11", title: { uz: "11-sinf huquq darsligi", kk: "11-klass huqıq dárisligi" }, icon: "book", paid: true },
   // Umumiy mavzular
   { id: "nazariya", title: { uz: "Davlat va huquq nazariyasi", kk: "Mámleket hám huqıq teoriyası" }, icon: "scales" },
   { id: "konst", title: { uz: "Konstitutsiyaviy huquq", kk: "Konstitutsiyalıq huqıq" }, icon: "doc" },

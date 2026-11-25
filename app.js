@@ -35,7 +35,11 @@
       profileTitle: "Profil", total: "jami ball", tests: "topshirilgan test",
       language: "Til", languageHint: "Tanlangan til menyu va test savollariga qo'llanadi.",
       guest: "Foydalanuvchi",
-      back: "Orqaga", comingSoon: "Tez orada", sectionHint: "Tayyorgarlik bo'limini tanlang.", mixedSection: "Aralash test"
+      back: "Orqaga", comingSoon: "Tez orada", sectionHint: "Tayyorgarlik bo'limini tanlang.", mixedSection: "Aralash test",
+      paidLabel: "Pullik", unlocked: "Ochilgan", payTitle: "Blokni ochish", payPrice: "Narxi", cardLabel: "Karta raqami",
+      payStep1: "Narxni yuqoridagi kartaga o'tkazing.", payStep2: "«To'lov qildim» tugmasini bosib, chek rasmini botga yuboring.",
+      payStep3: "To'lov tasdiqlangach blok avtomatik ochiladi.", iPaid: "To'lov qildim", copy: "Nusxalash", copied: "Karta raqami nusxalandi",
+      loading: "Yuklanmoqda...", loadErr: "Yuklab bo'lmadi. Keyinroq urinib ko'ring.", unlockedMsg: "Blok ochildi!"
     },
     kk: {
       appName: "Huqıq Test",
@@ -66,7 +70,11 @@
       profileTitle: "Profil", total: "jámi bal", tests: "tapsırılǵan test",
       language: "Til", languageHint: "Saylanǵan til menyu hám test sorawlarına qollanıladı.",
       guest: "Paydalanıwshı",
-      back: "Artqa", comingSoon: "Jaqında", sectionHint: "Tayarlıq bólimin saylań.", mixedSection: "Aralas test"
+      back: "Artqa", comingSoon: "Jaqında", sectionHint: "Tayarlıq bólimin saylań.", mixedSection: "Aralas test",
+      paidLabel: "Pullı", unlocked: "Ashılǵan", payTitle: "Blokti ashıw", payPrice: "Bahası", cardLabel: "Karta nomeri",
+      payStep1: "Bahasın joqarıdaǵı kartaǵa ótkeriń.", payStep2: "«Tólem ettim» túymesin basıp, chek suwretin botqa jiberiń.",
+      payStep3: "Tólem tastıyıqlanǵannan keyin blok avtomat túrde ashıladı.", iPaid: "Tólem ettim", copy: "Kóshiriw", copied: "Karta nomeri kóshirildi",
+      loading: "Júklenbekte...", loadErr: "Júklep bolmadı. Keyinirek urınıp kóriń.", unlockedMsg: "Blok ashıldı!"
     }
   };
 
@@ -94,6 +102,7 @@
     book: '<path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-7"/><path d="M20 5v13h-7"/>',
     clipcheck: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 14l2 2 4-4"/>',
     award: '<circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 21l4-2 4 2-1-7.5"/>',
+    copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
     target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8"/>',
     flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
     list: '<path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/>'
@@ -116,7 +125,7 @@
   }
   function saveHistory(h) { safeSet(STORE_KEY, JSON.stringify(h.slice(-200))); }
 
-  var state = { lang: detectLang(), tab: "home", section: null, view: "tabs", quiz: null, result: null, sheet: false, history: loadHistory(), timer: null };
+  var state = { lang: detectLang(), tab: "home", section: null, grants: {}, pay: null, view: "tabs", quiz: null, result: null, sheet: false, history: loadHistory(), timer: null };
 
   function t() { return I18N[state.lang]; }
   function L(obj) { return obj[state.lang] || obj.uz; }
@@ -140,6 +149,64 @@
     return u ? ([u.first_name, u.last_name].filter(Boolean).join(" ") || t().guest) : t().guest;
   }
 
+  // ---------- Pullik bloklar (Firebase) ----------
+  var GRANTS_KEY = "grants";
+  var fsdb = null;
+  function db() {
+    if (fsdb) return fsdb;
+    var cfg = window.CONFIG && window.CONFIG.firebase;
+    if (!window.firebase || !cfg || !cfg.projectId) return null;
+    try { if (!window.firebase.apps.length) window.firebase.initializeApp(cfg); fsdb = window.firebase.firestore(); } catch (e) { return null; }
+    return fsdb;
+  }
+  function notify(msg) { try { if (tg && tg.showAlert) { tg.showAlert(msg); return; } } catch (e) {} window.alert(msg); }
+  function priceOf(id) { var p = window.CONFIG && window.CONFIG.prices; return p && p[id] ? p[id] : ""; }
+  function cloud() { return tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9") ? tg.CloudStorage : null; }
+  function parseGrants(s) { try { var o = JSON.parse(s || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } }
+  function loadGrants(done) {
+    var c = cloud();
+    if (!c) { done(parseGrants(safeGet(GRANTS_KEY))); return; }
+    try { c.getItem(GRANTS_KEY, function (err, v) { done(err || !v ? parseGrants(safeGet(GRANTS_KEY)) : parseGrants(v)); }); }
+    catch (e) { done(parseGrants(safeGet(GRANTS_KEY))); }
+  }
+  function saveGrants() {
+    var s = JSON.stringify(state.grants);
+    safeSet(GRANTS_KEY, s);
+    var c = cloud(); if (c) { try { c.setItem(GRANTS_KEY, s, function () {}); } catch (e) {} }
+  }
+  function fetchGrant(key, cb) {
+    var d = db(); if (!d) { cb("nodb"); return; }
+    d.collection("grants").doc(key).get().then(function (snap) {
+      if (!snap.exists) cb("missing"); else cb(null, snap.data());
+    }).catch(function () { cb("error"); });
+  }
+  function openBot(param) {
+    var bot = window.CONFIG && window.CONFIG.botUsername;
+    var url = "https://t.me/" + bot + "?start=" + param;
+    try { if (tg && tg.openTelegramLink) { tg.openTelegramLink(url); return; } } catch (e) {}
+    window.open(url, "_blank");
+  }
+  function copyText(text) {
+    var done = function () { notify(t().copied); };
+    try { navigator.clipboard.writeText(text).then(done, function () {}); } catch (e) {}
+  }
+  function initGrants() {
+    loadGrants(function (g) {
+      state.grants = g;
+      if (state.view === "tabs") render();
+      var key = new URLSearchParams(window.location.search).get("grant");
+      if (key && /^[A-Za-z0-9_-]{16,64}$/.test(key)) {
+        fetchGrant(key, function (err, data) {
+          if (err || !data || !data.topicId) return;
+          state.grants[data.topicId] = key; saveGrants();
+          var sec = (window.SECTIONS || []).filter(function (s) { return s.topics.indexOf(data.topicId) >= 0; })[0];
+          state.tab = "topics"; state.view = "tabs"; state.section = sec ? sec.id : null;
+          render(); notify(t().unlockedMsg);
+        });
+      }
+    });
+  }
+
   // ---------- Test ----------
   function buildQuiz(topicId) {
     var pool = [];
@@ -158,6 +225,27 @@
   }
 
   function startQuiz(topicId) {
+    var tp = topicById(topicId);
+    if (tp && tp.paid) {
+      var key = state.grants[topicId];
+      if (!key) { state.pay = topicId; state.view = "pay"; render(); return; }
+      state.view = "loading"; render();
+      fetchGrant(key, function (err, data) {
+        if (!err && data && data.questions && data.questions.length) {
+          window.QUESTIONS[topicId] = data.questions;
+          beginQuiz(topicId);
+          return;
+        }
+        if (err === "missing") { delete state.grants[topicId]; saveGrants(); state.pay = topicId; state.view = "pay"; }
+        else { state.view = "tabs"; notify(t().loadErr); }
+        render();
+      });
+      return;
+    }
+    beginQuiz(topicId);
+  }
+
+  function beginQuiz(topicId) {
     stopTimer();
     state.quiz = buildQuiz(topicId);
     if (!state.quiz.items.length) { state.quiz = null; return; }
@@ -253,10 +341,12 @@
     var tps = sec.topics.map(topicById).filter(Boolean);
     var total = tps.reduce(function (s, tp) { return s + qCount(tp.id); }, 0);
     var rows = tps.map(function (tp) {
-      var n = qCount(tp.id);
-      return '<button class="card" data-act="start" data-id="' + tp.id + '"' + (n ? "" : " disabled") + '><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") +
-        '</div><div class="grow"><div class="name">' + esc(L(tp.title)) + '</div><div class="meta">' + (n ? t().questionsN(n) : t().comingSoon) + "</div></div>" +
-        (n ? svg(ICON.right, 20, "#AAB3CC") : "") + "</button>";
+      var n = qCount(tp.id), paid = !!tp.paid, open = paid && !!state.grants[tp.id];
+      var enabled = paid || n > 0;
+      var meta = paid ? (open ? t().unlocked : t().paidLabel + (priceOf(tp.id) ? " · " + priceOf(tp.id) : "")) : (n ? t().questionsN(n) : t().comingSoon);
+      var tail = paid ? (open ? svg(ICON.check, 20, "#5FD39A") : svg(ICON.lock, 20, "#C9A24B")) : (n ? svg(ICON.right, 20, "#AAB3CC") : "");
+      return '<button class="card" data-act="start" data-id="' + tp.id + '"' + (enabled ? "" : " disabled") + '><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") +
+        '</div><div class="grow"><div class="name">' + esc(L(tp.title)) + '</div><div class="meta">' + meta + "</div></div>" + tail + "</button>";
     }).join("");
     return '<div class="screen"><div class="row" style="gap:8px"><button class="xbtn" data-act="sectionBack" aria-label="' + t().back + '">' + svg(ICON.left, 20) + '</button><div class="meta" style="font-size:14px;font-weight:600;color:var(--ink-2)">' + t().tabs.topics + "</div></div>" +
       '<div class="list" style="gap:8px"><h1 style="font-size:28px">' + esc(L(sec.title)) + '</h1><p class="sub">' + t().pickTopic + "</p></div>" +
@@ -319,7 +409,9 @@
   }
 
   function viewRating() {
-    var rows = window.TOPICS.filter(hasQ).map(function (tp) {
+    var rows = window.TOPICS.filter(function (tp) {
+      return hasQ(tp) || state.history.some(function (r) { return r.topicId === tp.id; });
+    }).map(function (tp) {
       var best = null;
       state.history.forEach(function (r) { if (r.topicId === tp.id) { var p = pctOf(r); if (best === null || p > best) best = p; } });
       return '<div class="card"><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") + '</div><div class="grow"><div class="name">' + esc(L(tp.title)) +
@@ -344,6 +436,21 @@
       '">O\'zbekcha</button><button data-act="lang" data-lang="kk" class="' + (state.lang === "kk" ? "on" : "") + '">Qaraqalpaqsha</button></div><p class="sub" style="font-size:13px">' + t().languageHint + "</p></div></div>";
   }
 
+  function viewPay() {
+    var tp = topicById(state.pay), card = (window.CONFIG && window.CONFIG.card) || {};
+    var price = priceOf(tp.id);
+    return '<div class="screen"><div class="row" style="gap:8px"><button class="xbtn" data-act="payBack" aria-label="' + t().back + '">' + svg(ICON.left, 20) +
+      '</button><div class="meta" style="font-size:14px;font-weight:600;color:var(--ink-2)">' + t().payTitle + "</div></div>" +
+      '<div class="list center" style="gap:12px"><div class="sico gold" style="width:64px;height:64px;border-radius:32px">' + svg(ICON.lock, 30, "#0F1E3D") + "</div>" +
+      '<h1 style="font-size:26px">' + esc(L(tp.title)) + "</h1>" +
+      (price ? '<div class="chip gold" style="font-size:16px">' + t().payPrice + ": " + esc(price) + "</div>" : "") + "</div>" +
+      '<div class="card" style="justify-content:space-between"><div class="grow"><div class="meta">' + t().cardLabel + '</div><div class="name" style="font-size:20px;letter-spacing:1px">' +
+      esc(card.number || "") + '</div><div class="meta">' + esc(card.owner || "") + '</div></div><button class="xbtn" data-act="copy" data-text="' + esc(card.number || "") +
+      '" aria-label="' + t().copy + '">' + svg(ICON.copy, 20) + "</button></div>" +
+      '<div class="note"><span>1. ' + t().payStep1 + "</span><span>2. " + t().payStep2 + "</span><span>3. " + t().payStep3 + "</span></div>" +
+      '<button class="btn gold spacer" data-act="iPaid" data-id="' + tp.id + '">' + t().iPaid + "</button></div>";
+  }
+
   function viewNav() {
     var tabs = [["home", ICON.home], ["topics", ICON.tests], ["rating", ICON.cup], ["profile", ICON.user]];
     return '<nav aria-label="menu">' + tabs.map(function (x) {
@@ -358,6 +465,8 @@
     var html;
     if (state.view === "quiz" && state.quiz) html = viewQuiz();
     else if (state.view === "result" && state.result) html = viewResult() + viewNav();
+    else if (state.view === "pay" && state.pay) html = viewPay() + viewNav();
+    else if (state.view === "loading") html = '<div class="screen"><div class="empty" style="margin:auto 0">' + t().loading + "</div></div>" + viewNav();
     else {
       state.view = "tabs";
       html = { home: viewHome, topics: viewTopics, rating: viewRating, profile: viewProfile }[state.tab]() + viewNav();
@@ -377,6 +486,9 @@
     if (act === "tab") { state.tab = el.getAttribute("data-tab"); state.view = "tabs"; state.section = null; render(); window.scrollTo(0, 0); }
     else if (act === "section") { state.section = el.getAttribute("data-id"); render(); window.scrollTo(0, 0); }
     else if (act === "sectionBack") { state.section = null; render(); window.scrollTo(0, 0); }
+    else if (act === "iPaid") { openBot("pay_" + el.getAttribute("data-id")); }
+    else if (act === "payBack") { state.view = "tabs"; render(); window.scrollTo(0, 0); }
+    else if (act === "copy") { copyText(el.getAttribute("data-text")); }
     else if (act === "start" || act === "retry") { startQuiz(el.getAttribute("data-id")); window.scrollTo(0, 0); }
     else if (act === "goTopics") { state.view = "tabs"; state.tab = "topics"; render(); window.scrollTo(0, 0); }
     else if (act === "pick") { state.quiz.items[state.quiz.i].picked = +el.getAttribute("data-pos"); haptic("light"); renderKeepScroll(); }
@@ -390,4 +502,5 @@
   });
 
   render();
+  initGrants();
 })();
