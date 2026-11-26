@@ -39,7 +39,8 @@
       paidLabel: "Pullik", unlocked: "Ochilgan", payTitle: "Blokni ochish", payPrice: "Narxi", cardLabel: "Karta raqami",
       payStep1: "Narxni yuqoridagi kartaga o'tkazing.", payStep2: "«To'lov qildim» tugmasini bosib, chek rasmini botga yuboring.",
       payStep3: "To'lov tasdiqlangach blok avtomatik ochiladi.", iPaid: "To'lov qildim", copy: "Nusxalash", copied: "Karta raqami nusxalandi",
-      loading: "Yuklanmoqda...", loadErr: "Yuklab bo'lmadi. Keyinroq urinib ko'ring.", unlockedMsg: "Blok ochildi!"
+      loading: "Yuklanmoqda...", loadErr: "Yuklab bo'lmadi. Keyinroq urinib ko'ring.", unlockedMsg: "Blok ochildi!",
+      mine: "Mening testlarim", mineDesc: "Sotib olinganlar va ishlanganlar", bought: "Sotib olinganlar", doneTab: "Ishlanganlar", noBought: "Hali sotib olingan test yo'q."
     },
     kk: {
       appName: "Huqıq Test",
@@ -74,7 +75,8 @@
       paidLabel: "Pullı", unlocked: "Ashılǵan", payTitle: "Blokti ashıw", payPrice: "Bahası", cardLabel: "Karta nomeri",
       payStep1: "Bahasın joqarıdaǵı kartaǵa ótkeriń.", payStep2: "«Tólem ettim» túymesin basıp, chek suwretin botqa jiberiń.",
       payStep3: "Tólem tastıyıqlanǵannan keyin blok avtomat túrde ashıladı.", iPaid: "Tólem ettim", copy: "Kóshiriw", copied: "Karta nomeri kóshirildi",
-      loading: "Júklenbekte...", loadErr: "Júklep bolmadı. Keyinirek urınıp kóriń.", unlockedMsg: "Blok ashıldı!"
+      loading: "Júklenbekte...", loadErr: "Júklep bolmadı. Keyinirek urınıp kóriń.", unlockedMsg: "Blok ashıldı!",
+      mine: "Meniń testlerim", mineDesc: "Satıp alınǵanlar hám islengenler", bought: "Satıp alınǵanlar", doneTab: "Islengenler", noBought: "Ele satıp alınǵan test joq."
     }
   };
 
@@ -327,6 +329,7 @@
   }
 
   function viewTopics() {
+    if (state.section === "mine") return viewMine();
     var sec = state.section ? sectionById(state.section) : null;
     if (!sec) {
       var cards = (window.SECTIONS || []).map(function (s, idx) {
@@ -336,7 +339,9 @@
           '<div class="sec-t">' + esc(L(s.title)) + '</div><div class="meta" style="font-size:14px">' + esc(L(s.desc)) + "</div></button>";
       }).join("");
       return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().tabs.topics + '</h1><p class="sub">' + t().sectionHint + "</p></div>" +
-        '<div class="list" style="gap:14px">' + cards + "</div></div>";
+        '<div class="list" style="gap:14px">' + cards +
+        '<button class="card" data-act="section" data-id="mine"><div class="ico">' + svg(ICON.list, 22, "#C9A24B") + '</div><div class="grow"><div class="name">' + t().mine +
+        '</div><div class="meta">' + t().mineDesc + "</div></div>" + svg(ICON.right, 20, "#AAB3CC") + "</button></div></div>";
     }
     var tps = sec.topics.map(topicById).filter(Boolean);
     var total = tps.reduce(function (s, tp) { return s + qCount(tp.id); }, 0);
@@ -436,6 +441,29 @@
       '">O\'zbekcha</button><button data-act="lang" data-lang="kk" class="' + (state.lang === "kk" ? "on" : "") + '">Qaraqalpaqsha</button></div><p class="sub" style="font-size:13px">' + t().languageHint + "</p></div></div>";
   }
 
+  function viewMine() {
+    var tab = state.mineTab === "done" ? "done" : "bought";
+    var boughtTopics = window.TOPICS.filter(function (tp) { return tp.paid && state.grants[tp.id]; });
+    var doneList = state.history.slice().reverse().slice(0, 50);
+    var body;
+    if (tab === "bought") {
+      body = boughtTopics.length ? '<div class="list">' + boughtTopics.map(function (tp) {
+        return '<button class="card" data-act="start" data-id="' + tp.id + '"><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") +
+          '</div><div class="grow"><div class="name">' + esc(L(tp.title)) + '</div><div class="meta">' + t().unlocked + "</div></div>" + svg(ICON.check, 20, "#5FD39A") + "</button>";
+      }).join("") + "</div>" : '<div class="empty">' + t().noBought + "</div>";
+    } else {
+      body = doneList.length ? '<div class="list">' + doneList.map(function (r) {
+        return '<button class="card" data-act="start" data-id="' + esc(r.topicId) + '"><div class="grow"><div class="name">' + esc(topicTitle(r.topicId)) + '</div><div class="meta">' +
+          fmtDate(r.date) + " · " + fmt(r.secs) + " · " + r.correct + "/" + r.total + '</div></div><div class="pct">' + pctOf(r) + "%</div></button>";
+      }).join("") + "</div>" : '<div class="empty">' + t().noResults + "</div>";
+    }
+    return '<div class="screen"><div class="row" style="gap:8px"><button class="xbtn" data-act="sectionBack" aria-label="' + t().back + '">' + svg(ICON.left, 20) +
+      '</button><div class="meta" style="font-size:14px;font-weight:600;color:var(--ink-2)">' + t().tabs.topics + "</div></div>" +
+      '<h1 style="font-size:28px">' + t().mine + "</h1>" +
+      '<div class="seg"><button data-act="mineTab" data-tab="bought" class="' + (tab === "bought" ? "on" : "") + '">' + t().bought + " (" + boughtTopics.length +
+      ')</button><button data-act="mineTab" data-tab="done" class="' + (tab === "done" ? "on" : "") + '">' + t().doneTab + " (" + state.history.length + ")</button></div>" + body + "</div>";
+  }
+
   function viewPay() {
     var tp = topicById(state.pay), card = (window.CONFIG && window.CONFIG.card) || {};
     var price = priceOf(tp.id);
@@ -489,6 +517,7 @@
     else if (act === "iPaid") { openBot("pay_" + el.getAttribute("data-id")); }
     else if (act === "payBack") { state.view = "tabs"; render(); window.scrollTo(0, 0); }
     else if (act === "copy") { copyText(el.getAttribute("data-text")); }
+    else if (act === "mineTab") { state.mineTab = el.getAttribute("data-tab"); render(); }
     else if (act === "start" || act === "retry") { startQuiz(el.getAttribute("data-id")); window.scrollTo(0, 0); }
     else if (act === "goTopics") { state.view = "tabs"; state.tab = "topics"; render(); window.scrollTo(0, 0); }
     else if (act === "pick") { state.quiz.items[state.quiz.i].picked = +el.getAttribute("data-pos"); haptic("light"); renderKeepScroll(); }
