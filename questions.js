@@ -12,8 +12,8 @@
 window.SECTIONS = [
   {
     id: "attestatsiya", icon: "clipcheck",
-    title: { uz: "Atestatsiyaga tayyorlanish", kk: "Attestatsiyaǵa tayarlanıw" },
-    desc: { uz: "Darslik mavzulari bo'yicha savollar", kk: "Dárislik temaları boyınsha sorawlar" },
+    title: { uz: "Atestatsiyaga tayyorlanish", kk: "Attestaciyaǵa tayarlanıw" },
+    desc: { uz: "Darslik mavzulari bo'yicha savollar", kk: "Sabaqlıq boyınsha sorawlar" },
     topics: ["sinf8", "sinf9", "sinf10", "sinf11"]
   },
   {
@@ -27,10 +27,10 @@ window.SECTIONS = [
 window.TOPICS = [
   // PULLIK darsliklar (paid: true). Ularning savollari bu faylda EMAS, botdagi paid_questions.json
   // faylida turadi va to'lov tasdiqlangach Firebase orqali foydalanuvchiga beriladi.
-  { id: "sinf8", title: { uz: "8-sinf huquq darsligi", kk: "8-klass huqıq dárisligi" }, icon: "book", paid: true },
-  { id: "sinf9", title: { uz: "9-sinf huquq darsligi", kk: "9-klass huqıq dárisligi" }, icon: "book", paid: true },
-  { id: "sinf10", title: { uz: "10-sinf huquq darsligi", kk: "10-klass huqıq dárisligi" }, icon: "book", paid: true },
-  { id: "sinf11", title: { uz: "11-sinf huquq darsligi", kk: "11-klass huqıq dárisligi" }, icon: "book", paid: true },
+  { id: "sinf8", title: { uz: "8-sinf huquq darsligi", kk: "8-klass huqıq sabaqlıǵı" }, icon: "book", paid: true },
+  { id: "sinf9", title: { uz: "9-sinf huquq darsligi", kk: "9-klass huqıq sabaqlıǵı" }, icon: "book", paid: true },
+  { id: "sinf10", title: { uz: "10-sinf huquq darsligi", kk: "10-klass huqıq sabaqlıǵı" }, icon: "book", paid: true },
+  { id: "sinf11", title: { uz: "11-sinf huquq darsligi", kk: "11-klass huqıq sabaqlıǵı" }, icon: "book", paid: true },
   // Umumiy mavzular
   { id: "nazariya", title: { uz: "Davlat va huquq nazariyasi", kk: "Mámleket hám huqıq teoriyası" }, icon: "scales" },
   { id: "konst", title: { uz: "Konstitutsiyaviy huquq", kk: "Konstitutsiyalıq huqıq" }, icon: "doc" },
@@ -45,19 +45,19 @@ window.QUESTIONS = {
       q: { uz: "Huquqning eng muhim belgilaridan biri qaysi?", kk: "Huqıqtıń eń áhmiyetli belgilerinen biri qaysı?" },
       o: [
         { uz: "Umummajburiylik", kk: "Hámmege májbúriyligi" },
-        { uz: "Ixtiyoriylik", kk: "Ixtiyarlıq" },
-        { uz: "Faqat urf-odatga tayanish", kk: "Tek ádet-ǵurıplarǵa tayanıw" },
+        { uz: "Ixtiyoriylik", kk: "Iqtiyariylıq" },
+        { uz: "Faqat urf-odatga tayanish", kk: "Tek úrp-ádetlerge tayanıw" },
         { uz: "Faqat jamoatchilik fikri", kk: "Tek jámiyetlik pikir" }
       ],
       a: 0,
       e: { uz: "Huquq normalari davlat tomonidan o'rnatiladi yoki sanksiyalanadi va hamma uchun majburiydir.", kk: "Huqıq normaları mámleket tárepinen belgilenedi yamasa sanksiyalanadı hám hámme ushın májbúriy esaplanadı." }
     },
     {
-      q: { uz: "Huquqiy munosabatning subyekti kim?", kk: "Huqıqıy qatnastıń subyekti kim?" },
+      q: { uz: "Huquqiy munosabatning subyekti kim?", kk: "Huqıqıy múnásibettiń subyekti kim?" },
       o: [
         { uz: "Huquq va majburiyatlar egasi bo'lgan shaxs", kk: "Huqıq hám májbúriyetlerge iye bolǵan shaxs" },
         { uz: "Faqat davlat organi", kk: "Tek mámleket organı" },
-        { uz: "Faqat mulk", kk: "Tek múlik" },
+        { uz: "Faqat mulk", kk: "Tek múlk" },
         { uz: "Faqat sud", kk: "Tek sud" }
       ],
       a: 0,
@@ -66,7 +66,7 @@ window.QUESTIONS = {
     {
       q: { uz: "Qonunning yuridik kuchi qaysi hujjatdan past bo'ladi?", kk: "Nızamnıń yuridikalıq kúshi qaysı hújjetten tómen boladı?" },
       o: [
-        { uz: "Konstitutsiyadan", kk: "Konstitutsiyadan" },
+        { uz: "Konstitutsiyadan", kk: "Konstituciyadan" },
         { uz: "Hukumat qarorlaridan", kk: "Húkimet qararlarınan" },
         { uz: "Vazirlik buyrug'idan", kk: "Ministrlik buyrıǵınan" },
         { uz: "Hokim qarorlaridan", kk: "Hákim qararlarınan" }
@@ -80,7 +80,7 @@ window.QUESTIONS = {
         { uz: "Huquqqa zid, aybli va jazolanadigan qilmish", kk: "Huqıqqa qarsı, ayıplı hám jazalanatuǵın is-háreket" },
         { uz: "Har qanday noxush hodisa", kk: "Hár qanday unamsız waqıya" },
         { uz: "Faqat jinoyat", kk: "Tek jinayat" },
-        { uz: "Faqat ma'muriy jarima", kk: "Tek ákimshilik jarıyma" }
+        { uz: "Faqat ma'muriy jarima", kk: "Tek hákimshilik járiyma" }
       ],
       a: 0,
       e: { uz: "Huquqbuzarlik huquqqa xilof, ayblilik va javobgarlik bilan bog'liq qilmishdir.", kk: "Huqıqbuzarlıq huqıqqa qarsı, ayıplılıq hám juwapkershilik penen baylanıslı is-háreket." }
@@ -89,7 +89,7 @@ window.QUESTIONS = {
 
   konst: [
     {
-      q: { uz: "O'zbekiston Respublikasi Konstitutsiyasi qachon qabul qilingan?", kk: "Ózbekstan Respublikası Konstitutsiyası qashan qabıl etilgen?" },
+      q: { uz: "O'zbekiston Respublikasi Konstitutsiyasi qachon qabul qilingan?", kk: "Ózbekstan Respublikası Konstituciyası qashan qabıl etilgen?" },
       o: [
         { uz: "1992-yil 8-dekabr", kk: "1992-jıl 8-dekabr" },
         { uz: "1991-yil 31-avgust", kk: "1991-jıl 31-avgust" },
@@ -97,21 +97,21 @@ window.QUESTIONS = {
         { uz: "1990-yil 20-iyun", kk: "1990-jıl 20-iyun" }
       ],
       a: 0,
-      e: { uz: "Konstitutsiya 1992-yil 8-dekabrda qabul qilingan, shu sana Konstitutsiya kuni sifatida nishonlanadi.", kk: "Konstitutsiya 1992-jıl 8-dekabrde qabıl etilgen, usı sáne Konstitutsiya kúni retinde belgilenedi." }
+      e: { uz: "Konstitutsiya 1992-yil 8-dekabrda qabul qilingan, shu sana Konstitutsiya kuni sifatida nishonlanadi.", kk: "Konstituciya 1992-jıl 8-dekabrde qabıl etilgen, usı sáne Konstituciya kúni retinde belgilenedi." }
     },
     {
       q: { uz: "O'zbekistonda davlat hokimiyati qanday prinsip asosida tashkil etiladi?", kk: "Ózbekstanda mámleketlik húkimet qanday princip tiykarında shólkemlestiriledi?" },
       o: [
-        { uz: "Hokimiyatlar bo'linishi", kk: "Húkimetlerdiń bólisiwi" },
+        { uz: "Hokimiyatlar bo'linishi", kk: "Húkimetlerdiń bóliniwi" },
         { uz: "Hokimiyatning yagona markazga jamlanishi", kk: "Húkimettiń bir orayǵa jıynalıwı" },
-        { uz: "Faqat ijro hokimiyati", kk: "Tek atqarıw húkimeti" },
+        { uz: "Faqat ijro hokimiyati", kk: "Tek atqarıw hákimyatı" },
         { uz: "Cheklanmagan hokimiyat", kk: "Sheklenbegen húkimet" }
       ],
       a: 0,
       e: { uz: "Qonun chiqaruvchi, ijro etuvchi va sud hokimiyatlari bir-biridan ajratilgan.", kk: "Nızam shıǵarıwshı, atqarıwshı hám sud húkimetleri bir-birinen ajıratılǵan." }
     },
     {
-      q: { uz: "Fuqarolik huquq va erkinliklari kim tomonidan kafolatlanadi?", kk: "Puqaralıq huqıq hám erkinlikler kim tárepinen kepillendiriledi?" },
+      q: { uz: "Fuqarolik huquq va erkinliklari ... tomonidan kafolatlanadi?", kk: "Puqaralıq huqıq hám erkinlikler ... tárepinen kepillenedi?" },
       o: [
         { uz: "Davlat", kk: "Mámleket" },
         { uz: "Faqat sud", kk: "Tek sud" },
@@ -136,18 +136,18 @@ window.QUESTIONS = {
 
   fuqaro: [
     {
-      q: { uz: "Jismoniy shaxsning huquq layoqati qachon vujudga keladi?", kk: "Jismoniy shaxstıń huqıq qábileti qashan payda boladı?" },
+      q: { uz: "Jismoniy shaxsning huquq layoqati qachon vujudga keladi?", kk: "Fizikalıq shaxstıń huqıq uqıplılıǵı qashan payda boladı?" },
       o: [
         { uz: "Tug'ilgan paytdan", kk: "Tuwılǵan waqıttan" },
         { uz: "18 yoshdan", kk: "18 jastan" },
         { uz: "16 yoshdan", kk: "16 jastan" },
-        { uz: "Nikohdan so'ng", kk: "Neke qıyılǵannan keyin" }
+        { uz: "Nikohdan so'ng", kk: "Neke dúzilgennen keyin" }
       ],
       a: 0,
-      e: { uz: "Huquq layoqati tug'ilgan paytdan boshlanadi va vafot etish bilan tugaydi.", kk: "Huqıq qábileti tuwılǵan waqıttan baslanadı hám qaytıs bolıw menen tamamlanadı." }
+      e: { uz: "Huquq layoqati tug'ilgan paytdan boshlanadi va vafot etish bilan tugaydi.", kk: "Huqıq uqıplılıǵı tuwılǵan waqıttan baslanadı hám qaytıs bolıw menen tamamlanadı." }
     },
     {
-      q: { uz: "Muomala layoqati to'liq hajmda qachondan boshlanadi?", kk: "Háreket qábileti tolıq kólemde qashan baslanadı?" },
+      q: { uz: "Muomala layoqati to'liq hajmda qachondan boshlanadi?", kk: "Qarım-qatnas uqıplılıǵı tolıq kólemde qashan baslanadı?" },
       o: [
         { uz: "18 yoshdan", kk: "18 jastan" },
         { uz: "14 yoshdan", kk: "14 jastan" },
@@ -155,7 +155,7 @@ window.QUESTIONS = {
         { uz: "21 yoshdan", kk: "21 jastan" }
       ],
       a: 0,
-      e: { uz: "Voyaga yetgan, ya'ni 18 yoshga to'lgan fuqaro to'liq muomala layoqatiga ega bo'ladi.", kk: "Kámeletke tolǵan, yaǵnıy 18 jasqa tolǵan puqara tolıq háreket qábiletine iye boladı." }
+      e: { uz: "Voyaga yetgan, ya'ni 18 yoshga to'lgan fuqaro to'liq muomala layoqatiga ega bo'ladi.", kk: "Erjetken, yaǵnıy 18 jasqa tolǵan puqara tolıq Qarım-qatnas uqıplılıǵına iye boladı." }
     },
     {
       q: { uz: "Shartnoma tuzishning umumiy shartlaridan biri qaysi?", kk: "Shártnama dúziwdiń ulıwma shártlerinen biri qaysı?" },
@@ -163,21 +163,21 @@ window.QUESTIONS = {
         { uz: "Tomonlarning erkin irodasi", kk: "Tárepleriń erkin erki" },
         { uz: "Faqat yozma shakl", kk: "Tek jazba forma" },
         { uz: "Albatta notarial tasdiq", kk: "Májbúriy túrde notarial tastıyıqlaw" },
-        { uz: "Davlat ruxsati", kk: "Mámleket ruxsatı" }
+        { uz: "Davlat ruxsati", kk: "Mámleket ruqsatı" }
       ],
       a: 0,
       e: { uz: "Shartnoma tomonlarning erkin va mos irodasiga asoslanadi.", kk: "Shártnama tárepleriń erkin hám óz-ara kelisken erkine tiykarlanadı." }
     },
     {
-      q: { uz: "Mulk huquqi tarkibiga nima kiradi?", kk: "Múlik huqıqı quramına ne kiredi?" },
+      q: { uz: "Mulk huquqi tarkibiga nima kiradi?", kk: "Múlk huqıqı quramına ne kiredi?" },
       o: [
-        { uz: "Egalik qilish, foydalanish va tasarruf etish", kk: "Iyelik etiw, paydalanıw hám tasarrıf etiw" },
+        { uz: "Egalik qilish, foydalanish va tasarruf etish", kk: "Iyelik etiw, paydalanıw hám basqarıw" },
         { uz: "Faqat foydalanish", kk: "Tek paydalanıw" },
         { uz: "Faqat egalik qilish", kk: "Tek iyelik etiw" },
         { uz: "Faqat sotish", kk: "Tek satıw" }
       ],
       a: 0,
-      e: { uz: "Mulkdorning uch vakolati: egalik qilish, foydalanish va tasarruf etish.", kk: "Múlik iyesiniń úsh ókilligi: iyelik etiw, paydalanıw hám tasarrıf etiw." }
+      e: { uz: "Mulkdorning uch vakolati: egalik qilish, foydalanish va tasarruf etish.", kk: "Múlik iyesiniń úsh wákilligi: iyelik etiw, paydalanıw hám basqarıw." }
     }
   ],
 
