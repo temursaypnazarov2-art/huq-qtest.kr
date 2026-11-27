@@ -40,7 +40,11 @@
       payStep1: "Narxni yuqoridagi kartaga o'tkazing.", payStep2: "«To'lov qildim» tugmasini bosib, chek rasmini botga yuboring.",
       payStep3: "To'lov tasdiqlangach blok avtomatik ochiladi.", iPaid: "To'lov qildim", copy: "Nusxalash", copied: "Karta raqami nusxalandi",
       loading: "Yuklanmoqda...", loadErr: "Yuklab bo'lmadi. Keyinroq urinib ko'ring.", unlockedMsg: "Blok ochildi!",
-      mine: "Mening testlarim", mineDesc: "Sotib olinganlar va ishlanganlar", bought: "Sotib olinganlar", doneTab: "Ishlanganlar", noBought: "Hali sotib olingan test yo'q."
+      mine: "Mening testlarim", mineDesc: "Sotib olinganlar va ishlanganlar", bought: "Sotib olinganlar", doneTab: "Ishlanganlar", noBought: "Hali sotib olingan test yo'q.",
+      ratingAll: "Umumiy", ratingTopics: "Mavzular", lbHint: "Eng ko'p ball to'plagan foydalanuvchilar.", lbEmpty: "Reyting hozircha bo'sh.", lbErr: "Reytingni yuklab bo'lmadi.",
+      you: "siz", testsN: function (n) { return n + " ta test"; },
+      syncOn: "Natijalar qurilmalar o'rtasida sinxronlanadi.", syncOff: "Sinxronlash va reyting uchun botga /start yuboring va chatdagi menyu tugmasi orqali oching.",
+      previewBtn: "Bepul sinov savoli", previewName: "sinov"
     },
     kk: {
       appName: "Huqıq Test",
@@ -76,7 +80,11 @@
       payStep1: "Bahasın joqarıdaǵı kartaǵa ótkeriń.", payStep2: "«Tólem ettim» túymesin basıp, chek suwretin botqa jiberiń.",
       payStep3: "Tólem tastıyıqlanǵannan keyin blok avtomat túrde ashıladı.", iPaid: "Tólem ettim", copy: "Kóshiriw", copied: "Karta nomeri kóshirildi",
       loading: "Júklenbekte...", loadErr: "Júklep bolmadı. Keyinirek urınıp kóriń.", unlockedMsg: "Blok ashıldı!",
-      mine: "Meniń testlerim", mineDesc: "Satıp alınǵanlar hám islengenler", bought: "Satıp alınǵanlar", doneTab: "Islengenler", noBought: "Ele satıp alınǵan test joq."
+      mine: "Meniń testlerim", mineDesc: "Satıp alınǵanlar hám islengenler", bought: "Satıp alınǵanlar", doneTab: "Islengenler", noBought: "Ele satıp alınǵan test joq.",
+      ratingAll: "Ulıwma", ratingTopics: "Temalar", lbHint: "Eń kóp bal toplaǵan paydalanıwshılar.", lbEmpty: "Reyting házirshe bos.", lbErr: "Reytingti júklep bolmadı.",
+      you: "siz", testsN: function (n) { return n + " test"; },
+      syncOn: "Nátiyjeler qurılmalar arasında sinxronlanadı.", syncOff: "Sinxronlaw hám reyting ushın botqa /start jiberip, chattaǵı menyu túymesi arqalı ashıń.",
+      previewBtn: "Biypul sınaq soraw", previewName: "sınaq"
     }
   };
 
@@ -140,6 +148,7 @@
   function hasQ(tp) { return qCount(tp.id) > 0; }
   function topicTitle(id) {
     if (id.indexOf("mixed") === 0) { return t().mixedName; }
+    if (id.indexOf("preview:") === 0) { var pt = topicById(id.slice(8)); return (pt ? L(pt.title) : id) + " (" + t().previewName + ")"; }
     var tp = topicById(id);
     return tp ? L(tp.title) : id;
   }
@@ -209,6 +218,67 @@
     });
   }
 
+  // ---------- Natijalarni sinxronlash va umumiy reyting (Firebase) ----------
+  var UKEY_KEY = "ukey";
+  function initUkey() {
+    var k = new URLSearchParams(window.location.search).get("k");
+    if (k && /^[A-Za-z0-9_-]{16,64}$/.test(k)) { safeSet(UKEY_KEY, k); return k; }
+    var s = safeGet(UKEY_KEY);
+    return s && /^[A-Za-z0-9_-]{16,64}$/.test(s) ? s : null;
+  }
+  state.ukey = initUkey(); state.ratingTab = "all"; state.lb = null; state.myLb = null;
+
+  function hashKey(key, cb) {
+    try {
+      window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(key)).then(function (buf) {
+        var hex = Array.prototype.map.call(new Uint8Array(buf), function (b) { return (b < 16 ? "0" : "") + b.toString(16); }).join("");
+        cb(hex.slice(0, 16));
+      }, function () { cb(null); });
+    } catch (e) { cb(null); }
+  }
+  function entryOf(r) { return { topicId: String(r.topicId), correct: r.correct, total: r.total, secs: r.secs, points: r.points, date: r.date }; }
+  function mergeHistory(a, b) {
+    var seen = {}, out = [];
+    a.concat(b).forEach(function (r) {
+      if (!r || typeof r.date !== "number" || !r.total || r.topicId == null) return;
+      var k = r.date + "|" + r.topicId;
+      if (!seen[k]) { seen[k] = true; out.push(entryOf(r)); }
+    });
+    out.sort(function (x, y) { return x.date - y.date; });
+    return out.slice(-200);
+  }
+  function pushHistory() {
+    var d = db(); if (!d || !state.ukey) return;
+    try {
+      d.collection("histories").doc(state.ukey).set({
+        entries: state.history.map(entryOf),
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function () { state.sync = "ok"; }).catch(function () { state.sync = "err"; });
+    } catch (e) {}
+  }
+  function pullHistory() {
+    var d = db(); if (!d || !state.ukey) return;
+    d.collection("histories").doc(state.ukey).get().then(function (snap) {
+      var remote = snap.exists && Array.isArray(snap.data().entries) ? snap.data().entries : [];
+      var merged = mergeHistory(state.history, remote);
+      var changed = merged.length !== state.history.length || merged.length !== remote.length;
+      state.history = merged; saveHistory(merged);
+      state.sync = "ok";
+      if (changed) pushHistory();
+      if (state.view === "tabs") render();
+    }).catch(function () { state.sync = "err"; });
+  }
+  function loadLeaderboard() {
+    var d = db(); if (!d) { state.lb = { err: true }; return; }
+    state.lb = { loading: true };
+    if (state.ukey && !state.myLb) hashKey(state.ukey, function (h) { state.myLb = h; if (state.lb && state.lb.rows && state.tab === "rating") render(); });
+    d.collection("leaderboard").orderBy("points", "desc").limit(20).get().then(function (qs) {
+      var rows = []; qs.forEach(function (doc) { var x = doc.data(); x.id = doc.id; rows.push(x); });
+      state.lb = { rows: rows };
+      if (state.tab === "rating" && state.view === "tabs") render();
+    }).catch(function () { state.lb = { err: true }; if (state.tab === "rating" && state.view === "tabs") render(); });
+  }
+
   // ---------- Test ----------
   function buildQuiz(topicId) {
     var pool = [];
@@ -276,7 +346,7 @@
     var total = qz.items.length;
     var secs = Math.min(Math.round((Date.now() - qz.startedAt) / 1000), total * 60);
     var res = { topicId: qz.topicId, correct: correct, total: total, secs: secs, points: correct * 10, date: Date.now() };
-    state.history.push(res); saveHistory(state.history);
+    if (qz.topicId.indexOf("preview:") !== 0) { state.history.push(res); saveHistory(state.history); pushHistory(); state.lb = null; }
     state.result = { res: res, wrong: wrong };
     state.quiz = null; state.sheet = false; state.view = "result";
     render();
@@ -414,6 +484,24 @@
   }
 
   function viewRating() {
+    var tab = state.ratingTab === "topics" ? "topics" : "all";
+    var seg = '<div class="seg"><button data-act="ratingTab" data-tab="all" class="' + (tab === "all" ? "on" : "") + '">' + t().ratingAll +
+      '</button><button data-act="ratingTab" data-tab="topics" class="' + (tab === "topics" ? "on" : "") + '">' + t().ratingTopics + "</button></div>";
+    if (tab === "topics") return viewTopicRating(seg);
+    if (!state.lb) loadLeaderboard();
+    var body, lb = state.lb || {};
+    if (lb.loading || !lb.rows && !lb.err) body = '<div class="empty">' + t().loading + "</div>";
+    else if (lb.err) body = '<div class="empty">' + t().lbErr + "</div>";
+    else if (!lb.rows.length) body = '<div class="empty">' + t().lbEmpty + "</div>";
+    else body = '<div class="list">' + lb.rows.map(function (r, i) {
+      var me = state.myLb && r.id === state.myLb;
+      return '<div class="card"' + (me ? ' style="border-color:var(--gold)"' : "") + '><div class="num' + (i < 3 ? " cur" : "") + '" style="width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (i + 1) +
+        '</div><div class="grow"><div class="name">' + esc(r.name || "?") + (me ? ' <span class="meta">(' + t().you + ")</span>" : "") + '</div><div class="meta">' + t().testsN(r.tests || 0) + " · " + (r.avg || 0) + '%</div></div><div class="pct">' + (r.points || 0) + "</div></div>";
+    }).join("") + "</div>";
+    return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().ratingTitle + '</h1><p class="sub">' + t().lbHint + "</p></div>" + seg + body + "</div>";
+  }
+
+  function viewTopicRating(seg) {
     var rows = window.TOPICS.filter(function (tp) {
       return hasQ(tp) || state.history.some(function (r) { return r.topicId === tp.id; });
     }).map(function (tp) {
@@ -422,7 +510,7 @@
       return '<div class="card"><div class="ico">' + svg(ICON[tp.icon] || ICON.doc, 22, "#C9A24B") + '</div><div class="grow"><div class="name">' + esc(L(tp.title)) +
         '</div></div><div class="pct">' + (best === null ? '<span class="meta">' + t().ratingNone + "</span>" : best + "%") + "</div></div>";
     }).join("");
-    return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().ratingTitle + '</h1><p class="sub">' + t().ratingHint + '</p></div><div class="list">' + rows + "</div></div>";
+    return '<div class="screen"><div class="list" style="gap:8px"><h1>' + t().ratingTitle + '</h1><p class="sub">' + t().ratingHint + "</p></div>" + seg + '<div class="list">' + rows + "</div></div>";
   }
 
   function viewProfile() {
@@ -438,7 +526,8 @@
       '<div class="stats"><div class="stat"><b>' + pts + "</b><span>" + t().total + '</span></div><div class="stat"><b>' + n + "</b><span>" + t().tests +
       '</span></div><div class="stat"><b>' + avg + "%</b><span>" + t().avg + "</span></div></div>" +
       '<div class="list" style="gap:10px"><div class="label">' + t().language + '</div><div class="seg"><button data-act="lang" data-lang="uz" class="' + (state.lang === "uz" ? "on" : "") +
-      '">O\'zbekcha</button><button data-act="lang" data-lang="kk" class="' + (state.lang === "kk" ? "on" : "") + '">Qaraqalpaqsha</button></div><p class="sub" style="font-size:13px">' + t().languageHint + "</p></div></div>";
+      '">O\'zbekcha</button><button data-act="lang" data-lang="kk" class="' + (state.lang === "kk" ? "on" : "") + '">Qaraqalpaqsha</button></div><p class="sub" style="font-size:13px">' + t().languageHint + "</p></div>" +
+      '<p class="sub" style="font-size:13px">' + (state.ukey ? t().syncOn : t().syncOff) + "</p></div>";
   }
 
   function viewMine() {
@@ -476,7 +565,8 @@
       esc(card.number || "") + '</div><div class="meta">' + esc(card.owner || "") + '</div></div><button class="xbtn" data-act="copy" data-text="' + esc(card.number || "") +
       '" aria-label="' + t().copy + '">' + svg(ICON.copy, 20) + "</button></div>" +
       '<div class="note"><span>1. ' + t().payStep1 + "</span><span>2. " + t().payStep2 + "</span><span>3. " + t().payStep3 + "</span></div>" +
-      '<button class="btn gold spacer" data-act="iPaid" data-id="' + tp.id + '">' + t().iPaid + "</button></div>";
+      (window.PREVIEW && window.PREVIEW[tp.id] && window.PREVIEW[tp.id].length ? '<button class="btn ghost spacer" data-act="preview" data-id="' + tp.id + '">' + t().previewBtn + "</button>" : "") +
+      '<button class="btn gold' + (window.PREVIEW && window.PREVIEW[tp.id] ? "" : " spacer") + '" data-act="iPaid" data-id="' + tp.id + '">' + t().iPaid + "</button></div>";
   }
 
   function viewNav() {
@@ -511,7 +601,9 @@
     var act = el.getAttribute("data-act");
     // Oyna fonini bosganda yopiladi, lekin ichidagi tugmalar yopmasin
     if (act === "closeSheet" && el.classList.contains("sheet-back") && e.target !== el) return;
-    if (act === "tab") { state.tab = el.getAttribute("data-tab"); state.view = "tabs"; state.section = null; render(); window.scrollTo(0, 0); }
+    if (act === "tab") { state.tab = el.getAttribute("data-tab"); state.view = "tabs"; state.section = null; if (state.tab === "rating") state.lb = null; render(); window.scrollTo(0, 0); }
+    else if (act === "ratingTab") { state.ratingTab = el.getAttribute("data-tab"); render(); }
+    else if (act === "preview") { var pid = el.getAttribute("data-id"); window.QUESTIONS["preview:" + pid] = window.PREVIEW[pid]; beginQuiz("preview:" + pid); window.scrollTo(0, 0); }
     else if (act === "section") { state.section = el.getAttribute("data-id"); render(); window.scrollTo(0, 0); }
     else if (act === "sectionBack") { state.section = null; render(); window.scrollTo(0, 0); }
     else if (act === "iPaid") { openBot("pay_" + el.getAttribute("data-id")); }
@@ -532,4 +624,5 @@
 
   render();
   initGrants();
+  pullHistory();
 })();
