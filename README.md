@@ -46,9 +46,9 @@ Telegram ID'ingizni bilish uchun botga `/id` yozing (avval bot ishlab turishi ke
 
 ```powershell
 pip install -r requirements.txt
-$env:BOT\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_TOKEN="9069231713:AAE36d7CW82SD6HOS4PA8Ctbce0-1JFJpPU"
-$env:WEBAPP\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_URL="https://temursaypnazarov2-art.github.io/huq-qtest.kr"
-$env:ADMIN\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_ID="663269480"
+$env:BOT_TOKEN="9069231713:AAE36d7CW82SD6HOS4PA8Ctbce0-1JFJpPU"
+$env:WEBAPP_URL="https://temursaypnazarov2-art.github.io/huq-qtest"
+$env:ADMIN_ID="663269480"
 python bot.py
 ```
 
